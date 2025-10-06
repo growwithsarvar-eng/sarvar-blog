@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://growwithsarvar-eng.github.io/sarvar-blog/sitemap.xml
