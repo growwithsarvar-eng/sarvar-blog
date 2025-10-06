@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Post | Sarvar's Blog</title>
+  <meta name="robots" content="index, follow">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Sarvar's Blog</h1>
+      <ul id="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <button id="mode-toggle" aria-label="Toggle theme">🌙</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="post-hero">
+      <div class="post-hero-bg"></div>
+      <div class="post-hero-content">
+        <a href="blog.html" class="back-btn" title="Back to blog">← All Posts</a>
+        <div class="post-meta pro-meta">
+          <span class="author">
+            <span class="avatar-verified">
+              <img src="images/profile.png" alt="Sarvar" class="author-avatar">
+              <span class="verified-badge" title="Verified">✔</span>
+            </span>
+            <span class="author-name">Sarvar</span>
+          </span>
+          <span class="date" id="meta-date"></span>
+          <div class="share-group">
+            <span class="share-label">Share:</span>
+            <a href="#" class="share-ico" title="Copy link" id="copy-link-btn">
+              <svg width="20" height="20" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13v-2a2 2 0 0 1 2-2h6"/><rect x="3" y="7" width="7" height="13" rx="2"/><rect x="14" y="2" width="7" height="13" rx="2"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="progress-bar"><div class="progress" id="read-progress"></div></div>
+      </div>
+    </div>
+    <article id="post-content" class="post-article"></article>
+  </main>
+
+  <footer>
+    <p>© 2025 Sarvar's Blog</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    // Professional post loader with meta info
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+    const postFile = getQueryParam('file') || 'posts/first-post.html';
+    fetch(postFile)
+      .then(r => r.text())
+      .then(html => {
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        let title = temp.querySelector('h1,h2')?.textContent || 'Blog Post';
+        let date = '';
+        // Try to extract date from <em>Published: ...</em>
+        const em = temp.querySelector('em');
+        if (em && /Published:/.test(em.textContent)) {
+          date = em.textContent.replace('Published:', '').trim();
+          em.remove();
+        }
+        // Remove <p>— Sarvar</p> if present
+        temp.querySelectorAll('p').forEach(p => {
+          if (p.textContent.trim().startsWith('—')) p.remove();
+        });
+        // Insert content
+        document.getElementById('post-content').innerHTML = `<h1>${title}</h1>${temp.innerHTML}`;
+        if(date) document.getElementById('meta-date').textContent = date;
+      });
+    // Reading progress bar
+    window.addEventListener('scroll', function() {
+      const article = document.getElementById('post-content');
+      const bar = document.getElementById('read-progress');
+      if (!article || !bar) return;
+      const rect = article.getBoundingClientRect();
+      const winH = window.innerHeight;
+      const total = article.scrollHeight - winH;
+      const scrolled = Math.min(Math.max(window.scrollY - article.offsetTop + winH/2, 0), total);
+      bar.style.width = (total > 0 ? (scrolled / total * 100) : 0) + '%';
+    });
+    // Copy link button
+    document.getElementById('copy-link-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      navigator.clipboard.writeText(window.location.href);
+      this.classList.add('copied');
+      setTimeout(()=>this.classList.remove('copied'), 1200);
+    });
+  </script>
+  <style>
+    .post-hero {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      margin: 2.5rem auto 0 auto;
+      border-radius: 22px 22px 0 0;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+      min-height: 120px;
+    }
+    .post-hero-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, #2563eb 0%, #7b61ff 100%);
+      filter: blur(0px) brightness(1.08);
+      z-index: 0;
+      min-height: 120px;
+    }
+    .post-hero-content {
+      position: relative;
+      z-index: 1;
+      padding: 1.5rem 2.2rem 1.1rem 2.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .back-btn {
+      color: #fff;
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 1.01rem;
+      margin-bottom: 0.5em;
+      opacity: 0.85;
+      transition: opacity 0.15s;
+    }
+    .back-btn:hover { opacity: 1; text-decoration: underline; }
+    .pro-meta {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      color: #fff;
+      font-size: 1.04rem;
+      margin-bottom: 0.2em;
+    }
+    .author {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      font-weight: 500;
+    }
+    .avatar-verified {
+      position: relative;
+      display: inline-block;
+    }
+    .author-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.13);
+      border: 2.5px solid #fff;
+      background: #fff;
+      transition: box-shadow 0.18s;
+      animation: avatarPop 0.7s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes avatarPop {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .verified-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      background: #22c55e;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.95em;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(44,62,80,0.10);
+      font-weight: bold;
+    }
+    .author-name { font-weight: 600; }
+    .date { opacity: 0.92; }
+    .share-group {
+      display: flex;
+      align-items: center;
+      gap: 0.3em;
+    }
+    .share-label { font-size: 0.98em; opacity: 0.8; margin-right: 0.2em; }
+    .share-ico {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      margin-left: 0.2em;
+      box-shadow: 0 1px 4px rgba(44,62,80,0.10);
+      transition: background 0.15s, box-shadow 0.15s;
+      border: none;
+    }
+    .share-ico:hover, .share-ico.copied {
+      background: #dbeafe;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.13);
+    }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.7em;
+    }
+    .progress {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e 0%, #2563eb 100%);
+      width: 0%;
+      border-radius: 4px;
+      transition: width 0.18s;
+    }
+    @media (max-width: 800px) {
+      .post-hero, .post-article { max-width: 99vw; }
+      .post-hero-content { padding: 1.1rem 1rem 0.7rem 1rem; }
+    }
+  </style>
+</body>
+</html>
